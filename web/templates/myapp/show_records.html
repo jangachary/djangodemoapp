@@ -1,0 +1,130 @@
+<!-- myapp/templates/myapp/show_records.html -->
+{% extends 'base.html' %} {% block content %}
+{% csrf_token %}
+<div class="container mt-4">
+  <h2 class="mb-4">All Records</h2>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Role</th>
+          <th scope="col">Actions</th>
+          <!-- Added Actions column -->
+          <!-- Add other fields as needed -->
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+        <tr id="row_{{ record.id }}">
+          <td>{{ record.name }}</td>
+          <td>{{ record.email }}</td>
+          <td>{{ record.role }}</td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-toggle="modal"
+              data-target="#viewModal{{ record.id }}"
+            >
+              View
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              onclick="deleteRecord( {{record.id}} )"
+            >
+              Delete
+            </button>
+          </td>
+          <!-- Add other fields as needed -->
+        </tr>
+
+        <!-- View Modal for each record -->
+        <div
+          class="modal fade"
+          id="viewModal{{ record.id }}"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="viewModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel">View Details</h5>
+                <button
+                  type="button"
+                  class="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <!-- Display record details here -->
+                <p><strong>Name:</strong> {{ record.name }}</p>
+                <p><strong>Email:</strong> {{ record.email }}</p>
+                <p><strong>Role:</strong> {{ record.role }}</p>
+                <!-- Add other details as needed -->
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- myapp/templates/myapp/show_records.html -->
+<script>
+  function deleteRecord(recordId) {
+    debugger;
+    // if (confirm("Are you sure you want to delete this record?")) {
+    const csrftoken = getCookie("csrftoken");
+
+    $.ajax({
+      url: `/web/delete_record/${recordId}/`,
+      type: "POST",
+      headers: { "X-CSRFToken": csrftoken },
+
+      success: function (response) {
+        alert(response.message);
+        // Remove the corresponding row from the table
+        $("#row_" + recordId).remove();
+      },
+      error: function (error) {
+        console.error("Error deleting record:", error);
+      },
+    });
+    // }
+  }
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        // Check if the cookie name matches the expected pattern
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+
+{% endblock %}
